@@ -1,0 +1,7 @@
+{
+    "python.testing.pytestArgs": [
+        "Gestor"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}
