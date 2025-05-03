@@ -12,6 +12,15 @@ def read_text(min_lenght=0, max_lenght=100, message=None):
         text = input("> ")
         if len(text) >= min_lenght and len(text) <= max_lenght:
             return text
+
+def read_text_tk(entry_widget, min_length=0, max_length=100):
+    """
+    Lee el texto desde un widget de entrada de Tkinter y valida su longitud.
+    """
+    text = entry_widget.get()
+    if len(text) < min_length or len(text) > max_length:
+        raise ValueError(f"El texto debe tener entre {min_length} y {max_length} caracteres.")
+    return text
         
 def valid_id(id, clients_list):
     if not re.match("^[0-9]{2}[A-Z]$", id.strip()):

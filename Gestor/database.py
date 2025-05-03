@@ -1,4 +1,4 @@
-from Gestor import settings
+import settings
 import csv
 import unittest
 
@@ -13,7 +13,7 @@ class Client:
     
 class Clients:
     clients_list = []
-
+    
     try:
         with open(settings.DATABASE_PATH, newline="\n") as file:
             reader = csv.reader(file, delimiter=";")
@@ -29,9 +29,24 @@ class Clients:
         for client in Clients.clients_list:
             if client.id == id:
                 return client
-
+    @staticmethod
+    def load():
+        try:
+            with open(settings.DATABASE_PATH, newline="\n") as file:
+                reader = csv.reader(file, delimiter=";")
+                Clients.clients_list = [
+                    Client(id, name, last_name) for id, name, last_name in reader
+                ]
+        except FileNotFoundError:
+            print(f"El archivo {settings.DATABASE_PATH} no existe. Se creará uno nuevo al guardar.")
+        except Exception as e:
+            print(f"Error al cargar el archivo: {e}")
     @staticmethod
     def create(id, name, last_name):
+        # Verificar si el cliente ya existe
+        if any(client.id == id for client in Clients.clients_list):
+            raise ValueError(f"El cliente con ID {id} ya existe.")
+        
         client = Client(id, name, last_name)
         Clients.clients_list.append(client)
         Clients.save()  # Guardar automáticamente
@@ -67,9 +82,9 @@ class Clients:
 
 class TestClients(unittest.TestCase):
     def test_save(self):
-        db.Clients.create("55C", "Charlie", "Chaplin")
-        db.Clients.save()
-        with open(db.settings.DATABASE_PATH, newline="\n") as file:
+        Clients.create("55C", "Charlie", "Chaplin")
+        Clients.save()
+        with open(settings.DATABASE_PATH, newline="\n") as file:
             reader = csv.reader(file, delimiter=";")
             clients = list(reader)
         self.assertIn(["55C", "Charlie", "Chaplin"], clients)
