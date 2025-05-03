@@ -1,5 +1,6 @@
-import settings
+from Gestor import settings
 import csv
+import unittest
 
 class Client:
     def __init__(self, id, name, last_name):
@@ -13,11 +14,16 @@ class Client:
 class Clients:
     clients_list = []
 
-    with open(settings.DATABASE_PATH, newline="\n") as file:
-        reader = csv.reader(file, delimiter=";")
-        for id, name, last_name in reader:
-            client = Client(id, name, last_name)
-            clients_list.append(client)
+    try:
+        with open(settings.DATABASE_PATH, newline="\n") as file:
+            reader = csv.reader(file, delimiter=";")
+            for id, name, last_name in reader:
+                client = Client(id, name, last_name)
+                clients_list.append(client)
+    except FileNotFoundError:
+        print(f"El archivo {settings.DATABASE_PATH} no existe. Se creará uno nuevo al guardar.")
+    except Exception as e:
+        print(f"Error al leer el archivo: {e}")
 
     def search(id):
         for client in Clients.clients_list:
@@ -28,6 +34,7 @@ class Clients:
     def create(id, name, last_name):
         client = Client(id, name, last_name)
         Clients.clients_list.append(client)
+        Clients.save()  # Guardar automáticamente
         return client
     
     @staticmethod
@@ -36,6 +43,7 @@ class Clients:
             if client.id == id:
                 Clients.clients_list[i].name = name
                 Clients.clients_list[i].last_name = last_name
+                Clients.save()  # Guardar automáticamente
                 return Clients.clients_list[i]
             
     @classmethod
@@ -43,12 +51,25 @@ class Clients:
         client_to_delete = cls.search(id)
         if client_to_delete:
             cls.clients_list.remove(client_to_delete)
+            cls.save()  # Guardar automáticamente
             return client_to_delete
         return None
     
     @staticmethod
     def save():
-        with open("settings.DATABASE_PATH", "w", newline="\n") as file:
-            writer = csv.writer(file, delimiter=";")
-            for client in Clients.clients_list:
-                writer.writerow([client.id, client.name, client.last_name])
+        try:
+            with open(settings.DATABASE_PATH, "w", newline="\n") as file:
+                writer = csv.writer(file, delimiter=";")
+                for client in Clients.clients_list:
+                    writer.writerow([client.id, client.name, client.last_name])
+        except Exception as e:
+            print(f"Error al guardar el archivo: {e}")
+
+class TestClients(unittest.TestCase):
+    def test_save(self):
+        db.Clients.create("55C", "Charlie", "Chaplin")
+        db.Clients.save()
+        with open(db.settings.DATABASE_PATH, newline="\n") as file:
+            reader = csv.reader(file, delimiter=";")
+            clients = list(reader)
+        self.assertIn(["55C", "Charlie", "Chaplin"], clients)

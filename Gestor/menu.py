@@ -1,12 +1,16 @@
 import os
+import platform
 import helpers
 import database as db
+
+def clear_screen():
+    os.system("cls" if platform.system() == "Windows" else "clear")
 
 helpers.clear_screen()
 
 def start():
     while True:
-        os.system("cls")
+        clear_screen()
 
         print("==========================")
         print("Bienvenid@ al Manager")
@@ -20,7 +24,11 @@ def start():
         print("==========================")
 
         option = input("Selecciona una opción: ")
-        os.system("cls")
+        clear_screen()
+
+        if option not in ["1", "2", "3", "4", "5", "6"]:
+            print("Opción no válida. Intenta de nuevo.")
+            continue
 
         if option == "1":
             print("Listando clientes...\n")
